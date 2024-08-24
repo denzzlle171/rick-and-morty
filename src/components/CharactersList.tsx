@@ -1,6 +1,7 @@
 import { CharacterCard } from './CharacterCard';
-import { Pagination } from './Pagination';
 import React, { useEffect } from 'react';
+
+import { useNavigate } from 'react-router-dom';
 
 import { useStoreCharacters } from '../store/store';
 import { Loader } from './Loader';
@@ -9,17 +10,26 @@ import { Loader } from './Loader';
 
 
 export const CharacterList: React.FC = () => {
-  const { getCharacters, loading, characters, currentPage } =
+  const { getCharacters, loading, characters, currentPage, errors } =
     useStoreCharacters((state) => ({
       getCharacters: state.getCharacters,
       loading: state.loading,
       characters: state.characters,
       currentPage: state.currentPage,
+      errors: state.errors,
     }));
+  
+   const navigate = useNavigate();
 
   useEffect(() => {
     getCharacters();
   }, [currentPage]);
+
+    useEffect(() => {
+      if (errors) {
+        navigate('/error');
+      }
+    }, [errors, navigate]);
 
 
 
@@ -34,7 +44,6 @@ export const CharacterList: React.FC = () => {
               <CharacterCard key={person.id} person={person} />
             ))}
           </div>
-          <Pagination />
         </div>
       )}
     </div>

@@ -17,10 +17,10 @@ interface IStateCharacter {
   filterGender: string;
   setFilterGender: (gender: string) => void;
 
-  sortField: string | null;
+  sortField: string 
   sortOrder: boolean | null;
   
-  setSortField: (field: string | null) => void;
+  setSortField: (field: string ) => void;
   setSortOrder: (order: boolean | null) => void;
 
   setCurrentPage: (page: number) => void;
@@ -29,7 +29,7 @@ interface IStateCharacter {
 }
 
 export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
-  errors: null,
+  errors:  null,
   loading: true,
   characters: [],
   allPages: 0,
@@ -50,9 +50,9 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
     set({ filterGender: gender });
   },
 
-  sortField: null,
+  sortField: 'none',
   sortOrder: true,
-  setSortField: (field: string | null) => {
+  setSortField: (field: string ) => {
     set({ sortField: field });
   },
   setSortOrder: (order: boolean | null) => {
@@ -76,6 +76,8 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
       const response = await fetch(
         `https://rickandmortyapi.com/api/character?${queryParams}`,
       );
+
+      
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -83,9 +85,8 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
 
       let sortedCharacters = data.results;
       const { sortField, sortOrder } = get();
-      
+
       if (sortField && sortOrder !== null) {
-        console.log(sortField);
         sortedCharacters = sortedCharacters.sort(
           (a: ICharacter, b: ICharacter) => {
             if (a[sortField] < b[sortField]) return sortOrder ? -1 : 1;
@@ -95,17 +96,10 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
         );
       }
 
-    
-
-      console.log("sorted by:-> " + sortField);
-      console.log('oder:-> ' + sortOrder);
-
       set({ allPages: data.info.pages });
 
       set({ characters: sortedCharacters });
-
     } catch (error) {
-
       if (error instanceof Error) {
         set({ errors: error.message });
       } else {

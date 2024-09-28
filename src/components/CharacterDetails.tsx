@@ -5,21 +5,23 @@ import { useParams, Link } from 'react-router-dom';
 export const CharacterDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { getCharacters, characters } = useStoreCharacters(
+  const { getCharacters, character } = useStoreCharacters(
     (state) => ({
-      characters: state.characters,
       getCharacters: state.getCharacters,
+      character: state.character,
     }),
   );
 
   useEffect(() => {
-    getCharacters();
+
+    getCharacters(id);         // 🍕🍕
   }, [id, getCharacters]);
+ 
 
-  const person = characters.find((person) => person.id === +id);
 
-  const date = new Date(person?.created);
-  const formattedDate = date.toLocaleDateString();
+  const formattedDate = character?.created
+    ? new Date(character.created).toLocaleDateString()
+    : 'Unknown';
 
   return (
     <div className='flex justify-center items-center flex-col text-white h-screen'>
@@ -32,39 +34,39 @@ export const CharacterDetails: React.FC = () => {
 
       <div>
         <img
-          src={person?.image}
+          src={character?.image}
           alt='photo'
           className='cursor-pointer object-cover rounded-full m-auto hover:rounded-lg transition-all duration-700 ease-in-out'
         />
         <div className='p-4 flex flex-col space-y-3 items-center '>
           <h2 className='text-xl font-bold text-gray-700  hover:text-orange-500'>
-            {person?.name}
+            {character?.name}
           </h2>
           <p className='text-gray-700  hover:text-orange-500'>
             status:{' '}
             <span
               className={
-                person?.status === 'Alive'
+                character?.status === 'Alive'
                   ? 'text-green-700 font-bold'
-                  : person?.status === 'Dead'
+                  : character?.status === 'Dead'
                   ? 'text-red-700 font-bold'
                   : 'font-bold'
               }
             >
-              {person?.status}
+              {character?.status}
             </span>
           </p>
           <p className='text-gray-700   hover:text-orange-500'>
-            species: {person?.species}
+            species: {character?.species}
           </p>
           <p className='text-gray-700  hover:text-orange-500'>
-            origin: {person?.origin.name}
+            origin: {character?.origin.name}
           </p>
           <p className='text-gray-700  hover:text-orange-500'>
-            sex: {person?.gender}
+            sex: {character?.gender}
           </p>
           <p className='text-gray-700  hover:text-orange-500'>
-            location: {person?.location.name}
+            location: {character?.location.name}
           </p>
           <p className='text-gray-700  hover:text-orange-500'>
             created: {formattedDate}

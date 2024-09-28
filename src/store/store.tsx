@@ -3,6 +3,7 @@ import{ICharacter}from '../types/ICharacter'
 
 interface IStateCharacter {
   characters: ICharacter[];
+  character: ICharacter | null;
   loading: boolean;
   errors: string | null;
   allPages: number;
@@ -17,21 +18,22 @@ interface IStateCharacter {
   filterGender: string;
   setFilterGender: (gender: string) => void;
 
-  sortField: string 
+  sortField: string;
   sortOrder: boolean | null;
-  
-  setSortField: (field: string ) => void;
+
+  setSortField: (field: string) => void;
   setSortOrder: (order: boolean | null) => void;
 
   setCurrentPage: (page: number) => void;
 
-  getCharacters: () => Promise<void>;
+  getCharacters: (id?: string | null) => Promise<void>; // !!!!
 }
 
 export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
-  errors:  null,
+  errors: null,
   loading: true,
   characters: [],
+  character: null,
   allPages: 0,
   currentPage: 0,
 
@@ -52,7 +54,7 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
 
   sortField: 'none',
   sortOrder: true,
-  setSortField: (field: string ) => {
+  setSortField: (field: string) => {
     set({ sortField: field });
   },
   setSortOrder: (order: boolean | null) => {
@@ -63,7 +65,9 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
     set({ currentPage: page });
   },
 
-  getCharacters: async () => {
+  getCharacters: async (id: string | null = null) => {
+    const baseUrl = `https://rickandmortyapi.com/api/character`;
+
     try {
       const { currentPage, filterName, filterStatus, filterGender } = get();
       const queryParams = new URLSearchParams({
@@ -74,31 +78,40 @@ export const useStoreCharacters = create<IStateCharacter>()((set, get) => ({
       });
 
       const response = await fetch(
-        `https://rickandmortyapi.com/api/character?${queryParams}`,
+        id ? `${baseUrl}/${id}` : `${baseUrl}?${queryParams}`,
       );
 
-      
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
+
       const data = await response.json();
 
-      let sortedCharacters = data.results;
-      const { sortField, sortOrder } = get();
+      // console.log(data)
 
-      if (sortField && sortOrder !== null) {
-        sortedCharacters = sortedCharacters.sort(
-          (a: ICharacter, b: ICharacter) => {
-            if (a[sortField] < b[sortField]) return sortOrder ? -1 : 1;
-            if (a[sortField] > b[sortField]) return sortOrder ? 1 : -1;
-            return 0;
-          },
-        );
+      if (id) {
+        set({ character: data });
+      } else {
+
+        let sortedCharacters = data.results;
+        const { sortField, sortOrder } = get();
+
+        if (sortField && sortOrder !== null) {
+          sortedCharacters = sortedCharacters.sort(
+            (a: ICharacter, b: ICharacter) => {
+              const key = sortField as keyof ICharacter;
+              if (a[key] < b[key]) return sortOrder ? -1 : 1;
+              if (a[key] > b[key]) return sortOrder ? 1 : -1;
+              return 0;
+            },
+          );
+        }
+
+        set({ allPages: data.info.pages });
+        set({ characters: sortedCharacters });
       }
 
-      set({ allPages: data.info.pages });
-
-      set({ characters: sortedCharacters });
     } catch (error) {
       if (error instanceof Error) {
         set({ errors: error.message });

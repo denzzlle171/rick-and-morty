@@ -1,29 +1,22 @@
 import { useStoreCharacters } from '../store/store';
 import ReactPaginate from 'react-paginate';
 
-
 interface PaginateEvent {
   selected: number;
 }
 
-
 export const Pagination: React.FC = () => {
-
-const { allPages, setCurrentPage, currentPage } = useStoreCharacters(
-  (state) => ({
-    allPages: state.allPages,
-    setCurrentPage: state.setCurrentPage,
-    currentPage: state.currentPage,
-  }),
-);
-  
+  const { allPages, setCurrentPage, currentPage } = useStoreCharacters(
+    (state) => ({
+      allPages: state.allPages,
+      setCurrentPage: state.setCurrentPage,
+      currentPage: state.currentPage,
+    }),
+  );
 
   const handlePageClick = (event: PaginateEvent) => {
     setCurrentPage(event.selected);
   };
-  
-  
-
 
   return (
     <div className='p-4'>
